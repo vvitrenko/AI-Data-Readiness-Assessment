@@ -54,6 +54,12 @@
   .summary{margin-top:20px;padding:24px;border-radius:15px;background:#fff;border:1px solid var(--line)}
   .summary h3{margin:0 0 8px}.summary p{margin:0 0 13px;color:#4b5563}
   .summary strong{color:var(--ink)}
+  .summary ul{margin:0 0 13px;padding-left:20px;color:#4b5563}.summary ul li{margin:0 0 6px}
+  .summary .focus{margin-top:13px;padding-top:13px;border-top:1px solid var(--line);font-size:13px;color:#4b5563}
+  .contact-block{font-size:16px;line-height:1.7}
+  .contact-block a{color:var(--accent);font-weight:700;text-decoration:underline}
+  .contact-highlight{font-size:16px;line-height:1.7;font-weight:400;color:var(--ink);background:#f2f1ff;border:1px solid #dedcff;border-radius:12px;padding:16px 18px;margin:8px 0}
+  .contact-highlight strong{font-weight:700}
   .priority{margin-top:18px}
   .priority-row{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:13px}
   .priority-row span:first-child{width:145px;font-weight:700}.mini{flex:1;height:7px;background:#e9ebef;border-radius:99px;overflow:hidden}.mini i{display:block;height:100%;background:#8b5cf6}
@@ -123,7 +129,7 @@
     <div class="scale"><span>0</span><span>25</span><span>50</span><span>70</span><span>85</span><span>100</span></div>
     <div class="summary">
       <h3 id="summaryTitle"></h3>
-      <p id="summaryText"></p>
+      <div id="summaryText"></div>
       <div class="priority" id="priority"></div>
     </div>
   </section>
@@ -136,7 +142,7 @@ const domains = [
 ["Understanding of quality/reliability","How well can you identify which data elements are reliable and which have known quality issues?",["No clear understanding","A rough, informal sense","Known for the most important data elements","Documented at the data-element level, with known quality issues tracked"]],
 ["Root-cause correction","When a data quality issue is identified, how is it typically resolved?",["Patched wherever it's noticed, not at the source","Sometimes at the source, depends on who catches it","Usually at the source","Always at the source, as policy"]],
 ["Data deterioration detection","Is data quality monitored on an ongoing basis, or only checked occasionally?",["Rarely checked","Spot-checked occasionally","Key data quality indicators are monitored regularly, and issues are tracked when identified","Data quality is systematically monitored against defined thresholds, with issues automatically detected, tracked, and addressed"]],
-["Historical depth","Do you have enough historical data to support the AI use case you're considering?",["Little or no historical data is available","Some historical data exists, but may not be sufficient","Enough historical data exists for the intended use case","Sufficient historical data exists, with enough coverage and consistency to support development and validation"]]]},
+["Historical depth","Do you have enough complete and consistent historical data to support the AI use case you're considering?",["Little or no historical data is available","Some historical data exists, but may not be sufficient","Enough historical data exists for the intended use case","Sufficient historical data exists, with enough coverage and consistency to support development and validation"]]]},
 {key:"access",name:"Accessibility & Integration",weight:.25,qs:[
 ["Connectivity/integration","How easily can the systems and data sources involved in this process be accessed and combined?",["Data is spread across many systems that don't connect, and combining it is a manual/ad hoc effort","Some systems connect, but key sources remain siloed or need workarounds","Most relevant data can be integrated, with some manual exceptions","Data across the relevant systems is accessible and integrable in a standard, repeatable way"]],
 ["Synchronization","How reliably is data synchronized between the systems involved in this process?",["Manually or inconsistently","On a scheduled basis, with occasional delays or gaps","Automatically synchronized at a frequency that generally meets the process needs","Automatically synchronized with defined freshness requirements and monitoring"]],
@@ -144,10 +150,10 @@ const domains = [
 ["Ability to provision access","If a new AI system needed access to this integrated data tomorrow, how long would it take to grant it?",["Weeks or more — custom work required","Days — some configuration needed","A day or less — mostly self-service","Immediate — access is already provisioned via standard interfaces"]],
 ["Permission propagation","How effectively do access permissions follow data and content across the systems where it is accessed and used?",["Permissions are managed separately across systems","Permissions are generally managed at the source system or folder level, but may not carry consistently to other applications","Permissions are associated with the content and maintained when it is accessed through integrated systems such as search or analytics","Permissions are consistently propagated across data, search, AI, and automation environments, ensuring users and AI applications only expose content they are authorized to access"]]]},
 {key:"governance",name:"Governance & Trust",weight:.25,qs:[
-["Data ownership & knowledge","If you needed to understand what a specific data field means, who would you go to?",["Not clear who to ask","Someone in IT, not the business","Someone in the business, informally","A documented business owner or subject-matter expert"]],
+["Data ownership & knowledge","If you needed to understand the business meaning of a specific data field, who would be the authoritative source?",["Not clear who to ask","Someone in IT, not the business","Someone in the business, but informally","A documented business owner or subject-matter expert"]],
 ["Appropriate use","Are there clear guidelines for how this data may and may not be used?",["No guidelines","Roughly, by informal understanding","Documented for important use cases","Yes, clearly documented"]],
 ["Document classification/tagging","How are documents and other unstructured content classified and tagged?",["No classification or tagging exists","Basic metadata or tagging exists for some content","Important content is classified and tagged using defined categories","Classification and tagging are standardized, maintained, and consistently applied"]],
-["Ethical use","To what extent does your data governance define principles for the ethical use of data and AI?",["Ethical considerations are addressed mainly on a case-by-case basis","General ethical principles exist, but they are not consistently incorporated","The data governance includes defined principles for responsible data and AI use","Ethical data and AI principles are embedded into decision-making processes"]],
+["Ethical use","To what extent does your data gov defines principles for the ethical use of data and AI, aligned with applicable regulations and recognized frameworks?",["Ethical considerations are addressed mainly on a case-by-case basis","General ethical principles exist, but they are not consistently incorporated","The data gov includes defined principles for responsible data and AI use","Ethical data and AI principles are embedded into decision-making processes"]],
 ["Regulatory & privacy compliance","Has it been confirmed that this data can legally be used for AI (e.g., under privacy regulations, consent terms, or data licensing agreements)?",["Not assessed","Informally assumed to be fine, but not formally reviewed or confirmed","Reviewed and confirmed for the current intended use case","Reviewed, confirmed, and monitored on an ongoing basis as use cases or regulations change"]]]},
 {key:"strategy",name:"Strategy",weight:.15,qs:[
 ["AI data strategy","How clearly does your organization's data strategy address AI adoption?",["There is no data or AI strategy","AI opportunities are recognized, but no formal plan exists","The strategy includes priorities for supporting AI adoption","AI data requirements are explicitly embedded in the organization's data strategy, with defined priorities and actions"]],
@@ -157,12 +163,56 @@ const domains = [
 ];
 
 const summaries = {
-"Very Early":{title:"Start with the foundation",text:"Your data foundation is not yet ready to reliably support the AI use case you have identified. Data may be fragmented, inconsistent, difficult to access, or poorly understood. Governance and strategic planning may also be limited.",focus:"Establish a reliable data foundation. Prioritize the quality and availability of data required for the specific AI use case, clarify business ownership, establish appropriate access and usage controls, and identify the capabilities and resources needed to move forward."},
-"Developing":{title:"Build on the foundations you have",text:"Your organization has some of the foundations needed for AI, but important gaps could make an AI implementation unreliable or difficult to scale. Some relevant data and governance practices exist, but they are not yet consistently applied.",focus:"Strengthen the reliability and accessibility of the data needed for the target use case. Formalize ownership and usage rules, improve integration and data-quality practices, confirm privacy and regulatory requirements, and turn AI data needs into prioritized, resourced actions."},
-"Moderate":{title:"Strengthen and standardize",text:"Your organization has a workable data foundation for AI, but several capabilities need to mature before the use case can be deployed confidently and scaled. Core data is generally available and usable, with some quality, governance, access, and strategic practices already in place.",focus:"Close gaps that could create reliability, security, or scalability issues. Strengthen automated monitoring, standardize access and integration patterns, formalize governance and business ownership, and establish a clear roadmap connecting AI initiatives to required data capabilities."},
-"Strong":{title:"Operationalize and scale",text:"Your organization has a strong foundation for the AI use case, with most key data capabilities already in place. Data is generally accurate, accessible, and integrated, with established quality, governance, access, and strategic practices.",focus:"Operationalize and scale what already works. Automate quality and compliance monitoring, strengthen permission propagation and standardized integration, close remaining governance gaps, and ensure the roadmap, ownership, budget, and capacity can support AI beyond the initial use case."},
-"Advanced":{title:"Maintain and expand",text:"Your organization has a mature data foundation that is well positioned to support the identified AI use case and broader AI adoption. Data is reliable, accessible, integrated, scalable, and supported by established governance and strategic capabilities.",focus:"Maintain this foundation as AI adoption expands. Continue monitoring data quality, access, compliance, and governance as new use cases and data sources are introduced, while keeping the data roadmap aligned with evolving AI requirements and business priorities."}
+"Very Early":{title:"Very Early (0–24)",
+paras:["Your data foundation is not yet ready to reliably support the AI use case you have identified.",
+"Data may be fragmented, inconsistent, difficult to access, or poorly understood. Quality issues are often addressed reactively, and there may be limited visibility into which data can be trusted. Access and integration may depend on manual workarounds, while ownership, usage guidelines, classification, and compliance requirements may not be clearly defined.",
+"At the strategic level, AI data needs may be recognized, but there is little formal planning, prioritization, or dedicated resourcing behind them."],
+focusList:["Identify the minimum data required for the target AI use case and assess whether it is complete, accurate, sufficiently historical, and fit for purpose.",
+"Assign clear business ownership to the key data and establish who is responsible for its meaning, quality, and appropriate use.",
+"Address critical data-quality issues at their source and establish basic monitoring for the data that matters most to the use case.",
+"Establish a basic, repeatable approach for data access, integration, and synchronization, reducing reliance on manual workarounds.",
+"Define the governance and strategic requirements for the AI use case, including appropriate use, privacy and regulatory requirements, priorities, ownership, and the resources needed to move forward."],
+goal:"Establish enough trusted, accessible, and governed data to determine whether the AI use case is viable."},
+"Developing":{title:"Developing (25–49)",
+paras:["Your organization has some of the foundations needed for AI, but important gaps could make an AI implementation unreliable or difficult to scale.",
+"Some relevant data is available and certain systems may already be connected, but gaps in data quality, synchronization, accessibility, or historical coverage remain. The organization may have a general understanding of important data and some governance practices, but these are not yet consistently applied.",
+"AI opportunities may be recognized, and data priorities may be influenced by business objectives, but a clear AI-focused data roadmap, ownership model, and dedicated resources may still be developing."],
+focusList:["Prioritize the highest-impact data-quality gaps affecting the target AI use case and establish repeatable monitoring.",
+"Improve integration, synchronization, and access between the systems the AI process depends on, reducing manual workarounds.",
+"Formalize business ownership, data definitions, usage guidelines, classification, and access controls for important data.",
+"Confirm privacy, regulatory, consent, licensing, and responsible-use requirements for the intended AI use case.",
+"Turn AI data requirements into a prioritized roadmap with clear owners, resources, dependencies, and timelines."],
+goal:"Move from isolated data capabilities and informal practices to a reliable foundation that can support an initial AI implementation."},
+"Moderate":{title:"Moderate (50–69)",
+paras:["Your organization has a workable data foundation for AI, but several capabilities need to mature before the use case can be deployed confidently and scaled.",
+"Core data is generally available and usable, and many of the systems involved in the process can be integrated. Data quality is understood for important areas, and some monitoring, governance, and access practices are already in place. The organization also has some alignment between its data priorities and business or AI objectives.",
+"However, gaps may remain in areas such as systematic quality monitoring, scalable integration, permission propagation, business ownership, content classification, compliance monitoring, or strategic resourcing."],
+focusList:["Identify and address the remaining gaps that could create accuracy, security, compliance, or scalability risks for the AI use case.",
+"Move toward automated data-quality and freshness monitoring, with defined thresholds, issue tracking, and source-level remediation.",
+"Standardize integration, access, and permission propagation across data platforms, search, AI, and automation environments.",
+"Strengthen governance and strategy by formalizing ownership, classification, compliance monitoring, and the roadmap connecting AI initiatives to data capabilities, resources, and dependencies."],
+goal:"Remove the gaps that could prevent the AI use case from operating reliably and establish the controls needed to scale it."},
+"Strong":{title:"Strong (70–84)",
+paras:["Your organization has a strong foundation for the AI use case, with most of the key data capabilities already in place.",
+"The relevant data is generally accurate, accessible, and integrated, with established processes for identifying and addressing quality issues. Important data has defined ownership and usage guidance, and access controls and governance practices provide a foundation for responsible AI use. The organization also has clearer alignment between its data strategy, business objectives, and AI priorities.",
+"The remaining gaps are more likely to involve consistency, automation, scale, and operational maturity rather than fundamental data readiness. Some processes may still depend on manual intervention, have incomplete monitoring, or lack the standardization needed to support broader AI adoption."],
+focusList:["Automate remaining data-quality, freshness, compliance, and governance processes where manual monitoring or intervention remains.",
+"Replace one-off approaches with standardized, reusable patterns for data integration, access, and permission propagation.",
+"Close remaining gaps in data ownership, classification, metadata, business definitions, and responsible use.",
+"Validate that the data architecture, operating model, roadmap, ownership, and investment can support additional AI use cases and increased scale."],
+goal:"Turn a strong foundation into a repeatable operating model that can support multiple AI use cases."},
+"Advanced":{title:"Advanced (85–100)",
+paras:["Your organization has a mature data foundation that is well positioned to support the identified AI use case and broader AI adoption.",
+"Data is consistently reliable, sufficiently historical, accessible, integrated, and supported by scalable infrastructure. Data quality is systematically monitored, issues can be addressed at their source, and access controls can be maintained across the environments where data is used.",
+"Business ownership, data meaning, usage guidelines, classification, responsible AI principles, and compliance requirements are clearly established. AI data requirements are embedded in the broader data strategy, with defined priorities, ownership, resources, and a roadmap connecting AI initiatives to the capabilities needed to support them."],
+focusList:["Continuously monitor data quality, freshness, access controls, and reliability as new data sources and AI use cases are introduced.",
+"Regularly review privacy, regulatory, licensing, and responsible AI requirements as regulations, technologies, and use cases evolve.",
+"Periodically validate that the architecture, integrations, and governance model can support increasing scale and new AI workloads.",
+"Keep data strategy, ownership, standards, and investment aligned with the organization's evolving AI pipeline and business priorities."],
+goal:"Maintain the foundation while continuously adapting it to new AI use cases, technologies, regulations, and business priorities."}
 };
+
+const contactHtml = `<div class="focus contact-block"><div class="contact-highlight"><strong>Have questions? Contact us:</strong><br>stanislav.samko@sigma.software<br>lexander.logvinenko@sigma.software<br><br>Read more here: <a href="https://sigma.software/services/data-engineering" target="_blank" rel="noopener">Data engineering services and Analytics - Sigma Software</a></div></div>`;
 
 const qContainer=document.getElementById("questions");
 let html="";
@@ -217,7 +267,10 @@ function showScore(){
   document.getElementById("scoreFill").style.width=score+"%";
   document.getElementById("level").textContent=level;
   document.getElementById("summaryTitle").textContent=s.title;
-  document.getElementById("summaryText").innerHTML=`${s.text}<br><br><strong>Focus next:</strong> ${s.focus}`;
+  const parasHtml=s.paras.map(p=>`<p>${p}</p>`).join("");
+  const focusHtml=`<p><strong>Focus next on:</strong></p><ul>${s.focusList.map(f=>`<li>${f}</li>`).join("")}</ul>`;
+  const goalHtml=`<p><strong>Primary goal:</strong> ${s.goal}</p>`;
+  document.getElementById("summaryText").innerHTML=parasHtml+focusHtml+goalHtml+contactHtml;
 
   const sorted=[...results.domainScores].sort((a,b)=>a.score-b.score);
   document.getElementById("priority").innerHTML="<b>Domain snapshot</b>"+sorted.map(d=>`<div class="priority-row"><span>${d.name}</span><div class="mini"><i style="width:${d.score}%"></i></div><span>${Math.round(d.score)}</span></div>`).join("");
